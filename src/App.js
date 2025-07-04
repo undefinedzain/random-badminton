@@ -195,13 +195,13 @@ export default function App() {
               key={i}
               className="bg-white rounded-lg shadow p-4 text-center w-96"
             >
-              <h2 className="font-semibold text-gray-700">Tim {i + 1}</h2>
+              <h2 className="font-semibold text-gray-700">Team {i + 1}</h2>
               {a && b ? (
                 <p className="text-lg font-bold mt-2">
                   {a} & {b}
                 </p>
               ) : (
-                <p className="text-gray-400 italic mt-2">Menunggu undian...</p>
+                <p className="text-gray-400 italic mt-2">Click start...</p>
               )}
             </div>
           ))}
