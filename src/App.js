@@ -176,14 +176,14 @@ export default function App() {
                 onClick={start}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
               >
-                Mulai Undian
+                START
               </button>
             ) : (
               <button
                 onClick={stop}
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow"
               >
-                Stop
+                STOP
               </button>
             )}
           </div>
