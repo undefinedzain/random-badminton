@@ -164,7 +164,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl h-screen mx-auto flex flex-row gap-x-8 items-center">
+      <div className="max-w-7xl min-h-screen mx-auto flex flex-col lg:flex-row gap-8 items-center justify-center p-4">
         <div>
           <h1 className="text-3xl font-bold text-center mb-6 text-blue-700 max-w-96">
             Random Partner Application
@@ -189,11 +189,13 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
           {displayPairs.map(([a, b], i) => (
             <div
               key={i}
-              className="bg-white rounded-lg shadow p-4 text-center w-96"
+            //   className="bg-white rounded-lg shadow p-4 text-center w-96"
+            className="bg-white rounded-lg shadow p-4 text-center w-full max-w-xs mx-auto"
             >
               <h2 className="font-semibold text-gray-700">Team {i + 1}</h2>
               {a && b ? (
