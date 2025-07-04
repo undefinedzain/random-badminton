@@ -65,6 +65,7 @@ export default function App() {
     Array.from({ length: 16 }, () => ["", ""])
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isDone, setIsDone] = useState(false);
   const intervalRef = useRef(null);
 
   const generateRandomPairs = () => {
@@ -136,6 +137,7 @@ export default function App() {
 
     setPairs(result);
     setIsLoading(true);
+    setIsDone(false);
 
     intervalRef.current = setInterval(() => {
       const temp = result.map(() => {
@@ -153,6 +155,7 @@ export default function App() {
   const stop = () => {
     clearInterval(intervalRef.current);
     setIsLoading(false);
+    setIsDone(true);
     setDisplayPairs(pairs.map((p) => [p.p1, p.p2]));
   };
 
@@ -170,21 +173,27 @@ export default function App() {
             Random Partner Application
           </h1>
 
-          <div className="flex justify-center gap-4 mb-8">
-            {!isLoading ? (
+          <div className="flex justify-center gap-4 mb-8 min-h-[44px]">
+            {!isLoading && !isDone && (
               <button
                 onClick={start}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
               >
                 START
               </button>
-            ) : (
+            )}
+            {isLoading && (
               <button
                 onClick={stop}
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow"
               >
                 STOP
               </button>
+            )}
+            {!isLoading && isDone && (
+              <p className="text-green-700 font-semibold text-lg">
+                ✅ Random process done
+              </p>
             )}
           </div>
         </div>
