@@ -1,18 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-// ✅ Pasangan tetap
-const fixedPairs = [
-  { p1: "Fanani", p2: "Tiyo" },
-  { p1: "Agung", p2: "Angga" },
-  { p1: "Yoga", p2: "Bairul" },
-  { p1: "Pak Eko", p2: "Agung Sukro" },
-  { p1: "Yuniar", p2: "Andik" },
-  { p1: "Sanusi", p2: "Gus Rozaq" },
-  { p1: "Zain", p2: "Pak Imam" },
-  { p1: "Faisal", p2: "Rahmad" }
-];
-
-// ✅ Semua peserta
+// Semua peserta
 const participants = [
   { name: "Fanani", grade: "A" },
   { name: "Agung", grade: "A" },
@@ -51,89 +39,37 @@ const participants = [
   { name: "Abah Bagio", grade: "C" },
 ];
 
-// 🔀 Acak array
+// 🔀 Fungsi acak
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
-
-// 🔡 Ambil nama acak dari peserta
-const getRandomParticipantName = () => {
-  return participants[Math.floor(Math.random() * participants.length)].name;
-};
+const getRandomName = () => participants[Math.floor(Math.random() * participants.length)].name;
 
 export default function App() {
   const [pairs, setPairs] = useState([]);
-  const [displayPairs, setDisplayPairs] = useState(
-    Array.from({ length: 16 }, () => ["", ""])
-  );
+  const [displayPairs, setDisplayPairs] = useState(Array.from({ length: 16 }, () => ["", ""]));
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const intervalRef = useRef(null);
 
-  const generateRandomPairs = () => {
-    const used = new Set();
-    fixedPairs.forEach(({ p1, p2 }) => used.add(p1).add(p2));
+  const generatePairs = () => {
+    const a = shuffle(participants.filter((p) => p.grade === "A"));
+    const d = shuffle(participants.filter((p) => p.grade === "D"));
+    const b = shuffle(participants.filter((p) => p.grade === "B"));
+    const c = shuffle(participants.filter((p) => p.grade === "C"));
 
-    const bLeft = participants.filter(
-      (p) => p.grade === "B" && !used.has(p.name)
-    );
-    const cLeft = participants.filter(
-      (p) => p.grade === "C" && !used.has(p.name)
-    );
-
-    const bShuffled = shuffle(bLeft);
-    const cShuffled = shuffle(cLeft);
-
-    if (bShuffled.length !== cShuffled.length) {
-      alert("Jumlah pemain B dan C tersisa tidak sama!");
+    if (a.length !== d.length || b.length !== c.length) {
+      alert("Jumlah pemain tidak seimbang antara grade.");
       return [];
     }
 
-    // 🔁 Pasangkan B dan C, hindari pasangan terlarang
-    const randomPairs = [];
-    for (let i = 0; i < bShuffled.length; i++) {
-      const b = bShuffled[i];
-      for (let j = 0; j < cShuffled.length; j++) {
-        const c = cShuffled[j];
-        const isInvalid =
-          (b.name === "Pak Lutfi" && c.name === "Fian") ||
-          (b.name === "Fian" && c.name === "Pak Lutfi") ||
-          (b.name === "Faisal" && c.name === "Zain") ||
-          (b.name === "Zain" && c.name === "Faisal");
+    const adPairs = a.map((p, i) => ({ p1: p.name, p2: d[i].name }));
+    const bcPairs = b.map((p, i) => ({ p1: p.name, p2: c[i].name }));
 
-        if (
-          !isInvalid &&
-          !randomPairs.find((p) => p.p1 === b.name || p.p2 === c.name)
-        ) {
-          randomPairs.push({ p1: b.name, p2: c.name });
-          cShuffled.splice(j, 1);
-          break;
-        }
-      }
-    }
-
-    let shuffled;
-    let fianIndex, lutfiIndex, faisalIndex, zainIndex;
-
-    do {
-      shuffled = shuffle([...fixedPairs, ...randomPairs]);
-
-      const findIndex = (name) =>
-        shuffled.findIndex((pair) => pair.p1 === name || pair.p2 === name);
-
-      fianIndex = findIndex("Fian");
-      lutfiIndex = findIndex("Pak Lutfi");
-      faisalIndex = findIndex("Faisal");
-      zainIndex = findIndex("Zain");
-    } while (
-      Math.abs(fianIndex - lutfiIndex) < 4 ||
-      Math.abs(faisalIndex - zainIndex) < 4
-    );
-
-    return shuffled;
+    return shuffle([...adPairs, ...bcPairs]);
   };
 
   const start = () => {
-    const result = generateRandomPairs();
-    if (result.length === 0) return;
+    const result = generatePairs();
+    if (!result.length) return;
 
     setPairs(result);
     setIsLoading(true);
@@ -141,10 +77,10 @@ export default function App() {
 
     intervalRef.current = setInterval(() => {
       const temp = result.map(() => {
-        let a = getRandomParticipantName();
+        let a = getRandomName();
         let b;
         do {
-          b = getRandomParticipantName();
+          b = getRandomName();
         } while (a === b);
         return [a, b];
       });
@@ -167,35 +103,33 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl h-screen mx-auto flex flex-row gap-x-8 items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-center mb-6 text-blue-700 max-w-96">
-            Random Partner Application
-          </h1>
+      <div className="max-w-7xl h-full mx-auto flex flex-col items-center">
+        <h1 className="text-3xl font-bold text-center mb-6 text-blue-700">
+          Random Partner (Tanpa Rule)
+        </h1>
 
-          <div className="flex justify-center gap-4 mb-8 min-h-[44px]">
-            {!isLoading && !isDone && (
-              <button
-                onClick={start}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow w-36 h-36 rounded-full"
-              >
-                START
-              </button>
-            )}
-            {isLoading && (
-              <button
-                onClick={stop}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow w-36 h-36 rounded-full"
-              >
-                STOP
-              </button>
-            )}
-            {!isLoading && isDone && (
-              <p className="text-green-700 font-semibold text-lg">
-                ✅ Random process done
-              </p>
-            )}
-          </div>
+        <div className="flex justify-center gap-4 mb-8">
+          {!isLoading && !isDone && (
+            <button
+              onClick={start}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+            >
+              START
+            </button>
+          )}
+          {isLoading && (
+            <button
+              onClick={stop}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow"
+            >
+              STOP
+            </button>
+          )}
+          {!isLoading && isDone && (
+            <span className="text-green-700 font-semibold text-lg">
+              ✅ Random process done
+            </span>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-4">
@@ -206,32 +140,28 @@ export default function App() {
             const [a2, b2] = displayPairs[idx2];
 
             return (
-            <div key={i} className="flex items-center justify-center gap-6">
-                {/* Team kiri */}
+              <div key={i} className="flex flex-row justify-center items-center gap-6">
+                {/* Tim kiri */}
                 <div className="bg-white rounded-lg shadow p-4 text-center w-80">
-                <h2 className="font-semibold text-gray-700">Team {idx1 + 1}</h2>
-                {a1 && b1 ? (
-                    <p className="text-lg font-bold mt-2">{a1} & {b1}</p>
-                ) : (
-                    <p className="text-gray-400 italic mt-2">Click start...</p>
-                )}
+                  <h2 className="font-semibold text-gray-700">Team {idx1 + 1}</h2>
+                  <p className="text-lg font-bold mt-2">
+                    {a1 && b1 ? `${a1} & ${b1}` : "Click start..."}
+                  </p>
                 </div>
 
                 {/* VS */}
-                <div className="text-xl font-extrabold text-gray-700">VS</div>
+                <div className="text-2xl font-extrabold text-gray-700">VS</div>
 
-                {/* Team kanan */}
+                {/* Tim kanan */}
                 <div className="bg-white rounded-lg shadow p-4 text-center w-80">
-                <h2 className="font-semibold text-gray-700">Team {idx2 + 1}</h2>
-                {a2 && b2 ? (
-                    <p className="text-lg font-bold mt-2">{a2} & {b2}</p>
-                ) : (
-                    <p className="text-gray-400 italic mt-2">Click start...</p>
-                )}
+                  <h2 className="font-semibold text-gray-700">Team {idx2 + 1}</h2>
+                  <p className="text-lg font-bold mt-2">
+                    {a2 && b2 ? `${a2} & ${b2}` : "Click start..."}
+                  </p>
                 </div>
-            </div>
+              </div>
             );
-        })}
+          })}
         </div>
       </div>
     </div>
