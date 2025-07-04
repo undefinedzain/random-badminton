@@ -168,6 +168,13 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl h-screen mx-auto flex flex-row gap-x-8 items-center">
+        <div className="w-96">
+            <h1 className="text-xl font-bold">Participants</h1>
+            <br></br>
+            {
+                participants.map((e, idx) => <p>{idx + 1}. {e.name}</p>)
+            }
+        </div>
         <div>
           <h1 className="text-3xl font-bold text-center mb-6 text-blue-700 max-w-96">
             Random Partner Application
