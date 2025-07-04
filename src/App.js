@@ -177,7 +177,7 @@ export default function App() {
             {!isLoading && !isDone && (
               <button
                 onClick={start}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow w-36 h-36 rounded-full"
               >
                 START
               </button>
@@ -185,7 +185,7 @@ export default function App() {
             {isLoading && (
               <button
                 onClick={stop}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow"
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow w-36 h-36 rounded-full"
               >
                 STOP
               </button>
