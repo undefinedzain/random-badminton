@@ -198,22 +198,40 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {displayPairs.map(([a, b], i) => (
-            <div
-              key={i}
-              className="bg-white rounded-lg shadow p-4 text-center w-96"
-            >
-              <h2 className="font-semibold text-gray-700">Team {i + 1}</h2>
-              {a && b ? (
-                <p className="text-lg font-bold mt-2">
-                  {a} & {b}
-                </p>
-              ) : (
-                <p className="text-gray-400 italic mt-2">Click start...</p>
-              )}
+        <div className="grid grid-cols-1 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => {
+            const idx1 = i * 2;
+            const idx2 = i * 2 + 1;
+            const [a1, b1] = displayPairs[idx1];
+            const [a2, b2] = displayPairs[idx2];
+
+            return (
+            <div key={i} className="flex items-center justify-center gap-6">
+                {/* Team kiri */}
+                <div className="bg-white rounded-lg shadow p-4 text-center w-80">
+                <h2 className="font-semibold text-gray-700">Team {idx1 + 1}</h2>
+                {a1 && b1 ? (
+                    <p className="text-lg font-bold mt-2">{a1} & {b1}</p>
+                ) : (
+                    <p className="text-gray-400 italic mt-2">Click start...</p>
+                )}
+                </div>
+
+                {/* VS */}
+                <div className="text-xl font-extrabold text-gray-700">VS</div>
+
+                {/* Team kanan */}
+                <div className="bg-white rounded-lg shadow p-4 text-center w-80">
+                <h2 className="font-semibold text-gray-700">Team {idx2 + 1}</h2>
+                {a2 && b2 ? (
+                    <p className="text-lg font-bold mt-2">{a2} & {b2}</p>
+                ) : (
+                    <p className="text-gray-400 italic mt-2">Click start...</p>
+                )}
+                </div>
             </div>
-          ))}
+            );
+        })}
         </div>
       </div>
     </div>
