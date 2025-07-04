@@ -167,7 +167,7 @@ export default function App() {
       <div className="max-w-7xl h-screen mx-auto flex flex-row gap-x-8 items-center">
         <div>
           <h1 className="text-3xl font-bold text-center mb-6 text-blue-700 max-w-96">
-            🎯 Undian Balong Besuk Internal Cup 2025
+            Random Partner Application
           </h1>
 
           <div className="flex justify-center gap-4 mb-8">
