@@ -32,7 +32,7 @@ const participants = [
   { name: "Pak Budi", grade: "B" },
   { name: "Reno", grade: "B" },
   { name: "Asep", grade: "B" },
-  { name: "Syukron", grade: "B" },
+  { name: "Pak Heny", grade: "B" },
   { name: "Pak Falik", grade: "B" },
   { name: "Pak Imam", grade: "B" },
   { name: "Pak Lutfi", grade: "B" },
