@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 
-// ✅ Pasangan tetap
 const fixedPairs = [
   { p1: "Fanani", p2: "Tiyo" },
   { p1: "Agung", p2: "Angga" },
@@ -12,7 +11,6 @@ const fixedPairs = [
   { p1: "Faisal", p2: "Rahmad" }
 ];
 
-// ✅ Semua peserta
 const participants = [
   { name: "Fanani", grade: "A" },
   { name: "Agung", grade: "A" },
@@ -51,10 +49,8 @@ const participants = [
   { name: "Abah Bagio", grade: "C" },
 ];
 
-// 🔀 Acak array
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
-// 🔡 Ambil nama acak dari peserta
 const getRandomParticipantName = () => {
   return participants[Math.floor(Math.random() * participants.length)].name;
 };
@@ -87,7 +83,6 @@ export default function App() {
       return [];
     }
 
-    // 🔁 Pasangkan B dan C, hindari pasangan terlarang
     const randomPairs = [];
     for (let i = 0; i < bShuffled.length; i++) {
       const b = bShuffled[i];
