@@ -114,13 +114,10 @@ export default function App() {
     do {
       shuffled = shuffle([...fixedPairs, ...randomPairs]);
 
-      const findIndex = (name) =>
-        shuffled.findIndex((pair) => pair.p1 === name || pair.p2 === name);
-
-      fianIndex = findIndex("Fian");
-      lutfiIndex = findIndex("Pak Lutfi");
-      faisalIndex = findIndex("Faisal");
-      zainIndex = findIndex("Zain");
+      fianIndex = shuffled.findIndex((pair) => pair.p1 === "Fian" || pair.p2 === "Fian");
+      lutfiIndex = shuffled.findIndex((pair) => pair.p1 === "Pak Lutfi" || pair.p2 === "Pak Lutfi");
+      faisalIndex = shuffled.findIndex((pair) => pair.p1 === "Faisal" || pair.p2 === "Faisal");
+      zainIndex = shuffled.findIndex((pair) => pair.p1 === "Zain" || pair.p2 === "Zain");
     } while (
       Math.abs(fianIndex - lutfiIndex) < 4 ||
       Math.abs(faisalIndex - zainIndex) < 4
