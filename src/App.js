@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Dices, Hand, CircleCheckBig, RefreshCw, Users, X } from "lucide-react";
+import Bracket from "./Bracket";
 
 const fixedPairs = [
   { p1: "Fanani", p2: "Tiyo" },
@@ -62,6 +64,7 @@ export default function App() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [showParticipants, setShowParticipants] = useState(false);
   const intervalRef = useRef(null);
 
   const generateRandomPairs = () => {
@@ -161,79 +164,146 @@ export default function App() {
   }, [pairs, isLoading]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl h-screen mx-auto flex flex-row gap-x-8 items-center">
-        <div className="w-96">
-            <h1 className="text-xl font-bold">Participants</h1>
-            <br></br>
-            {
-                participants.map((e, idx) => <p>{idx + 1}. {e.name}</p>)
-            }
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-center mb-6 text-blue-700 max-w-96">
-            Random Partner Application
-          </h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-6 relative overflow-hidden">
+      {/* Background ornaments */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Glowing blobs */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-emerald-500/8 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 left-1/4 w-[500px] h-[500px] bg-indigo-500/8 rounded-full blur-3xl" />
+        <div className="absolute top-20 right-1/3 w-60 h-60 bg-cyan-400/5 rounded-full blur-2xl" />
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: "60px 60px",
+          }}
+        />
+        {/* Radial glow center */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-400/5 rounded-full blur-3xl" />
+        {/* Subtle diagonal lines */}
+        <div
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,0.15) 40px, rgba(255,255,255,0.15) 41px)`,
+          }}
+        />
+      </div>
 
-          <div className="flex justify-center gap-4 mb-8 min-h-[44px]">
-            {!isLoading && !isDone && (
-              <button
-                onClick={start}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow w-36 h-36 rounded-full"
-              >
-                START
-              </button>
-            )}
-            {isLoading && (
-              <button
-                onClick={stop}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow w-36 h-36 rounded-full"
-              >
-                STOP
-              </button>
-            )}
-            {!isLoading && isDone && (
-              <p className="text-green-700 font-semibold text-lg">
-                ✅ Random process done
+      <div className="mx-auto w-fit relative z-10">
+        <h1 className="text-4xl font-extrabold text-center mb-1 text-white tracking-tight">
+          Random Partner Application
+        </h1>
+        <p className="text-center text-blue-300/70 text-sm mb-8">
+          {participants.length} peserta &middot; {displayPairs.length} tim
+          <button
+            onClick={() => setShowParticipants(true)}
+            className="ml-3 inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+          >
+            <Users className="w-3.5 h-3.5" /> Lihat Peserta
+          </button>
+        </p>
+
+        <div className="flex justify-center gap-4 mb-8 min-h-[44px]">
+          {!isLoading && !isDone && (
+            <button
+              onClick={start}
+              className="bg-emerald-500 hover:bg-emerald-400 text-white px-10 py-3 rounded-full shadow-lg shadow-emerald-500/30 text-lg font-bold transition-all hover:scale-105"
+            >
+              <Dices className="inline-block w-5 h-5 mr-2" /> START
+            </button>
+          )}
+          {isLoading && (
+            <button
+              onClick={stop}
+              className="bg-rose-500 hover:bg-rose-400 text-white px-10 py-3 rounded-full shadow-lg shadow-rose-500/30 text-lg font-bold animate-pulse transition-all"
+            >
+              <Hand className="inline-block w-5 h-5 mr-2" /> STOP
+            </button>
+          )}
+          {!isLoading && isDone && (
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-emerald-400 font-semibold text-lg">
+                <CircleCheckBig className="inline-block w-5 h-5 mr-1" /> Undian selesai!
               </p>
-            )}
-          </div>
+              <button
+                onClick={() => { setIsDone(false); setPairs([]); setDisplayPairs(Array.from({ length: 16 }, () => ["", ""])); }}
+                className="bg-blue-500 hover:bg-blue-400 text-white px-5 py-2 rounded-lg shadow-lg shadow-blue-500/20 text-sm font-semibold transition-all hover:scale-105"
+              >
+                <RefreshCw className="inline-block w-4 h-4 mr-1" /> Ulang
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => {
-            const idx1 = i * 2;
-            const idx2 = i * 2 + 1;
-            const [a1, b1] = displayPairs[idx1];
-            const [a2, b2] = displayPairs[idx2];
+        {/* Tournament bracket */}
+        <Bracket
+          teams={displayPairs.map(([a, b], i) => ({
+            name: a && b ? `${a} & ${b}` : null,
+          }))}
+        />
+      </div>
 
-            return (
-            <div key={i} className="flex items-center justify-center gap-6">
-                {/* Team kiri */}
-                <div className="bg-white rounded-lg shadow p-4 text-center w-80">
-                <h2 className="font-semibold text-gray-700">Team {idx1 + 1}</h2>
-                {a1 && b1 ? (
-                    <p className="text-lg font-bold mt-2">{a1} & {b1}</p>
-                ) : (
-                    <p className="text-gray-400 italic mt-2">Click start...</p>
-                )}
+      {/* Participants modal */}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
+          showParticipants ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setShowParticipants(false)}
+      >
+        {/* Blur overlay */}
+        <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300 ${
+          showParticipants ? "opacity-100" : "opacity-0"
+        }`} />
+
+        {/* Modal content */}
+        <div
+          className={`relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden transition-all duration-300 ${
+            showParticipants ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between p-6 pb-0 mb-4">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-500" /> Daftar Peserta
+            </h2>
+            <button
+              onClick={() => setShowParticipants(false)}
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Scrollable content */}
+          <div className="overflow-y-auto px-6 pb-6">
+            {["A", "B", "C", "D"].map((grade) => {
+              const group = participants.filter((p) => p.grade === grade);
+              if (group.length === 0) return null;
+              return (
+                <div key={grade} className="mb-4 last:mb-0">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                    Grade {grade}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-1">
+                    {group.map((p, idx) => (
+                      <div
+                        key={p.name}
+                        className="text-sm text-gray-700 py-1.5 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        {p.name}
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              );
+            })}
 
-                {/* VS */}
-                <div className="text-xl font-extrabold text-gray-700">VS</div>
-
-                {/* Team kanan */}
-                <div className="bg-white rounded-lg shadow p-4 text-center w-80">
-                <h2 className="font-semibold text-gray-700">Team {idx2 + 1}</h2>
-                {a2 && b2 ? (
-                    <p className="text-lg font-bold mt-2">{a2} & {b2}</p>
-                ) : (
-                    <p className="text-gray-400 italic mt-2">Click start...</p>
-                )}
-                </div>
+            <div className="mt-4 pt-3 border-t border-gray-100 text-center text-xs text-gray-400">
+              Total: {participants.length} peserta
             </div>
-            );
-        })}
+          </div>
         </div>
       </div>
     </div>
