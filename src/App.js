@@ -167,33 +167,61 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-6 relative overflow-hidden">
       {/* Background ornaments */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Glowing blobs */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-emerald-500/8 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 left-1/4 w-[500px] h-[500px] bg-indigo-500/8 rounded-full blur-3xl" />
-        <div className="absolute top-20 right-1/3 w-60 h-60 bg-cyan-400/5 rounded-full blur-2xl" />
+        {/* Glowing blobs - larger and more visible */}
+        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-20 w-[450px] h-[450px] bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 left-1/4 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-20 right-1/3 w-80 h-80 bg-cyan-400/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-10 w-72 h-72 bg-violet-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-2/3 left-10 w-64 h-64 bg-teal-400/8 rounded-full blur-3xl" />
+        <div className="absolute top-10 left-1/2 w-96 h-96 bg-sky-400/8 rounded-full blur-3xl" />
+
         {/* Grid pattern overlay */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: "60px 60px",
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)`,
+            backgroundSize: "50px 50px",
           }}
         />
-        {/* Radial glow center */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-400/5 rounded-full blur-3xl" />
+
+        {/* Radial glow center top */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-400/8 rounded-full blur-3xl" />
+
         {/* Subtle diagonal lines */}
         <div
-          className="absolute inset-0 opacity-[0.015]"
+          className="absolute inset-0 opacity-[0.025]"
           style={{
-            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,0.15) 40px, rgba(255,255,255,0.15) 41px)`,
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,0.2) 35px, rgba(255,255,255,0.2) 36px)`,
           }}
         />
+
+        {/* Dot pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: `radial-gradient(circle, rgba(148,163,184,0.4) 1px, transparent 1px)`,
+            backgroundSize: "30px 30px",
+          }}
+        />
+
+        {/* Floating ring shapes */}
+        <div className="absolute top-[15%] left-[10%] w-40 h-40 border border-white/5 rounded-full" />
+        <div className="absolute top-[15%] left-[10%] w-52 h-52 border border-white/[0.03] rounded-full" />
+        <div className="absolute bottom-[20%] right-[8%] w-48 h-48 border border-white/5 rounded-full" />
+        <div className="absolute bottom-[20%] right-[8%] w-64 h-64 border border-white/[0.03] rounded-full" />
+        <div className="absolute top-[60%] left-[45%] w-32 h-32 border border-white/[0.04] rounded-full" />
+
+        {/* Shuttlecock-inspired accent lines */}
+        <div className="absolute top-[8%] right-[15%] w-24 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-45" />
+        <div className="absolute top-[12%] right-[18%] w-20 h-[1px] bg-gradient-to-r from-transparent via-white/8 to-transparent rotate-45" />
+        <div className="absolute bottom-[15%] left-[20%] w-28 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent -rotate-45" />
+        <div className="absolute bottom-[18%] left-[22%] w-20 h-[1px] bg-gradient-to-r from-transparent via-white/8 to-transparent -rotate-45" />
       </div>
 
       <div className="mx-auto w-fit relative z-10">
         <h1 className="text-4xl font-extrabold text-center mb-1 text-white tracking-tight">
-          Random Partner Application
+          Random Badminton Player Draw
         </h1>
         <p className="text-center text-blue-300/70 text-sm mb-8">
           {participants.length} peserta &middot; {displayPairs.length} tim
