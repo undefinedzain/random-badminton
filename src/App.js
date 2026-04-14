@@ -161,7 +161,7 @@ export default function App() {
         {/* Tournament bracket */}
         <Bracket
           teams={displayPairs.map(([a, b], i) => ({
-            name: a && b ? `${a} & ${b}` : null,
+            name: a && b ? `${a} / ${b}` : null,
           }))}
         />
       </div>
