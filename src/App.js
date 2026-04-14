@@ -1,145 +1,47 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Dices, Hand, CircleCheckBig, RefreshCw, Users, X } from "lucide-react";
+import { Dices, Hand, CircleCheckBig, RefreshCw } from "lucide-react";
 import Bracket from "./Bracket";
 
-const fixedPairs = [
-  { p1: "Fanani", p2: "Tiyo" },
-  { p1: "Agung", p2: "Angga" },
-  { p1: "Yoga", p2: "Bairul" },
-  { p1: "Pak Eko", p2: "Agung Sukro" },
-  { p1: "Yuniar", p2: "Andik" },
-  { p1: "Sanusi", p2: "Gus Rozaq" },
-  { p1: "Zain", p2: "Pak Imam" },
-  { p1: "Faisal", p2: "Rahmad" }
-];
+const TOTAL_PAIRS = 64;
 
-const participants = [
-  { name: "Fanani", grade: "A" },
-  { name: "Agung", grade: "A" },
-  { name: "Yoga", grade: "A" },
-  { name: "Pak Eko", grade: "A" },
-  { name: "Yuniar", grade: "A" },
-  { name: "Sanusi", grade: "A" },
-
-  { name: "Tiyo", grade: "D" },
-  { name: "Angga", grade: "D" },
-  { name: "Bairul", grade: "D" },
-  { name: "Agung Sukro", grade: "D" },
-  { name: "Andik", grade: "D" },
-  { name: "Gus Rozaq", grade: "D" },
-
-  { name: "Faisal", grade: "B" },
-  { name: "Pak Budi", grade: "B" },
-  { name: "Reno", grade: "B" },
-  { name: "Asep", grade: "B" },
-  { name: "Amin", grade: "B" },
-  { name: "Pak Falik", grade: "B" },
-  { name: "Pak Imam", grade: "B" },
-  { name: "Pak Lutfi", grade: "B" },
-  { name: "Dandi", grade: "B" },
-  { name: "Doni", grade: "B" },
-
-  { name: "Zain", grade: "C" },
-  { name: "Rahmad", grade: "C" },
-  { name: "Pak Majid", grade: "C" },
-  { name: "Pak Ajis", grade: "C" },
-  { name: "Sigit Sukro", grade: "C" },
-  { name: "Aris", grade: "C" },
-  { name: "Pak Heny", grade: "C" },
-  { name: "Ipunk", grade: "C" },
-  { name: "Fian", grade: "C" },
-  { name: "Abah Bagio", grade: "C" },
-];
+// Generate 128 dummy player names
+const dummyNames = Array.from({ length: TOTAL_PAIRS * 2 }, (_, i) => `Player ${i + 1}`);
 
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
-const getRandomParticipantName = () => {
-  return participants[Math.floor(Math.random() * participants.length)].name;
-};
+const getRandomName = () => dummyNames[Math.floor(Math.random() * dummyNames.length)];
 
 export default function App() {
   const [pairs, setPairs] = useState([]);
   const [displayPairs, setDisplayPairs] = useState(
-    Array.from({ length: 16 }, () => ["", ""])
+    Array.from({ length: TOTAL_PAIRS }, () => ["", ""])
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
-  const [showParticipants, setShowParticipants] = useState(false);
   const intervalRef = useRef(null);
 
   const generateRandomPairs = () => {
-    const used = new Set();
-    fixedPairs.forEach(({ p1, p2 }) => used.add(p1).add(p2));
-
-    const bLeft = participants.filter(
-      (p) => p.grade === "B" && !used.has(p.name)
-    );
-    const cLeft = participants.filter(
-      (p) => p.grade === "C" && !used.has(p.name)
-    );
-
-    const bShuffled = shuffle(bLeft);
-    const cShuffled = shuffle(cLeft);
-
-    if (bShuffled.length !== cShuffled.length) {
-      alert("Jumlah pemain B dan C tersisa tidak sama!");
-      return [];
+    // Pairs are always sequential: Player 1 & Player 2, Player 3 & Player 4, etc.
+    const fixedPairs = [];
+    for (let i = 0; i < dummyNames.length; i += 2) {
+      fixedPairs.push({ p1: dummyNames[i], p2: dummyNames[i + 1] });
     }
-
-    const randomPairs = [];
-    for (let i = 0; i < bShuffled.length; i++) {
-      const b = bShuffled[i];
-      for (let j = 0; j < cShuffled.length; j++) {
-        const c = cShuffled[j];
-        const isInvalid =
-          (b.name === "Pak Lutfi" && c.name === "Fian") ||
-          (b.name === "Fian" && c.name === "Pak Lutfi") ||
-          (b.name === "Faisal" && c.name === "Zain") ||
-          (b.name === "Zain" && c.name === "Faisal");
-
-        if (
-          !isInvalid &&
-          !randomPairs.find((p) => p.p1 === b.name || p.p2 === c.name)
-        ) {
-          randomPairs.push({ p1: b.name, p2: c.name });
-          cShuffled.splice(j, 1);
-          break;
-        }
-      }
-    }
-
-    let shuffled;
-    let fianIndex, lutfiIndex, faisalIndex, zainIndex;
-
-    do {
-      shuffled = shuffle([...fixedPairs, ...randomPairs]);
-
-      fianIndex = shuffled.findIndex((pair) => pair.p1 === "Fian" || pair.p2 === "Fian");
-      lutfiIndex = shuffled.findIndex((pair) => pair.p1 === "Pak Lutfi" || pair.p2 === "Pak Lutfi");
-      faisalIndex = shuffled.findIndex((pair) => pair.p1 === "Faisal" || pair.p2 === "Faisal");
-      zainIndex = shuffled.findIndex((pair) => pair.p1 === "Zain" || pair.p2 === "Zain");
-    } while (
-      Math.abs(fianIndex - lutfiIndex) < 4 ||
-      Math.abs(faisalIndex - zainIndex) < 4
-    );
-
-    return shuffled;
+    // Only shuffle the position/order of pairs in the bracket
+    return shuffle(fixedPairs);
   };
 
   const start = () => {
     const result = generateRandomPairs();
-    if (result.length === 0) return;
-
     setPairs(result);
     setIsLoading(true);
     setIsDone(false);
 
     intervalRef.current = setInterval(() => {
       const temp = result.map(() => {
-        let a = getRandomParticipantName();
+        let a = getRandomName();
         let b;
         do {
-          b = getRandomParticipantName();
+          b = getRandomName();
         } while (a === b);
         return [a, b];
       });
@@ -161,7 +63,7 @@ export default function App() {
   }, [pairs, isLoading]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-6 relative overflow-x-auto">
       {/* Background ornaments */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Glowing blobs - larger and more visible */}
@@ -221,13 +123,7 @@ export default function App() {
           Random Badminton Player Draw
         </h1>
         <p className="text-center text-blue-300/70 text-sm mb-8">
-          {participants.length} peserta &middot; {displayPairs.length} tim
-          <button
-            onClick={() => setShowParticipants(true)}
-            className="ml-3 inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
-          >
-            <Users className="w-3.5 h-3.5" /> Lihat Peserta
-          </button>
+          {TOTAL_PAIRS * 2} peserta &middot; {TOTAL_PAIRS} tim
         </p>
 
         <div className="flex justify-center gap-4 mb-8 min-h-[44px]">
@@ -253,7 +149,7 @@ export default function App() {
                 <CircleCheckBig className="inline-block w-5 h-5 mr-1" /> Undian selesai!
               </p>
               <button
-                onClick={() => { setIsDone(false); setPairs([]); setDisplayPairs(Array.from({ length: 16 }, () => ["", ""])); }}
+                onClick={() => { setIsDone(false); setPairs([]); setDisplayPairs(Array.from({ length: TOTAL_PAIRS }, () => ["", ""])); }}
                 className="bg-blue-500 hover:bg-blue-400 text-white px-5 py-2 rounded-lg shadow-lg shadow-blue-500/20 text-sm font-semibold transition-all hover:scale-105"
               >
                 <RefreshCw className="inline-block w-4 h-4 mr-1" /> Ulang
@@ -268,68 +164,6 @@ export default function App() {
             name: a && b ? `${a} & ${b}` : null,
           }))}
         />
-      </div>
-
-      {/* Participants modal */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
-          showParticipants ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setShowParticipants(false)}
-      >
-        {/* Blur overlay */}
-        <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300 ${
-          showParticipants ? "opacity-100" : "opacity-0"
-        }`} />
-
-        {/* Modal content */}
-        <div
-          className={`relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden transition-all duration-300 ${
-            showParticipants ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between p-6 pb-0 mb-4">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-500" /> Daftar Peserta
-            </h2>
-            <button
-              onClick={() => setShowParticipants(false)}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Scrollable content */}
-          <div className="overflow-y-auto px-6 pb-6">
-            {["A", "B", "C", "D"].map((grade) => {
-              const group = participants.filter((p) => p.grade === grade);
-              if (group.length === 0) return null;
-              return (
-                <div key={grade} className="mb-4 last:mb-0">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                    Grade {grade}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-1">
-                    {group.map((p, idx) => (
-                      <div
-                        key={p.name}
-                        className="text-sm text-gray-700 py-1.5 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                      >
-                        {p.name}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-
-            <div className="mt-4 pt-3 border-t border-gray-100 text-center text-xs text-gray-400">
-              Total: {participants.length} peserta
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
