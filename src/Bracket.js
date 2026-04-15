@@ -11,62 +11,100 @@ export default function Bracket({ teams }) {
   const matchRefs = useRef({});
   const [lines, setLines] = useState([]);
 
-  const { leftRounds, rightRounds } = useMemo(() => {
+  const { leftRounds, rightRounds, leftHasPrelim, rightHasPrelim } = useMemo(() => {
     if (!teams || teams.length === 0)
-      return { leftRounds: [], rightRounds: [], rounds: 0 };
+      return { leftRounds: [], rightRounds: [], leftHasPrelim: false, rightHasPrelim: false };
 
-    const totalSlots = Math.pow(2, Math.ceil(Math.log2(Math.max(teams.length, 2))));
-    const rnds = Math.log2(totalSlots);
-
-    const paddedTeams = [...teams];
-    while (paddedTeams.length < totalSlots) {
-      paddedTeams.push({ name: null, isBye: true });
-    }
-
-    // Split into two halves
-    const half = paddedTeams.length / 2;
-    const leftTeams = paddedTeams.slice(0, half);
-    const rightTeams = paddedTeams.slice(half);
+    // Split teams evenly between left and right
+    const halfCount = Math.ceil(teams.length / 2);
+    const leftTeamsRaw = teams.slice(0, halfCount);
+    const rightTeamsRaw = teams.slice(halfCount);
 
     const buildHalfRounds = (halfTeams, seedOffset) => {
+      const N = halfTeams.length;
+      if (N <= 1) return { rounds: [], hasPrelim: false };
+
+      // Largest power of 2 <= N for main bracket size
+      const P = Math.pow(2, Math.floor(Math.log2(Math.max(N, 2))));
+      const extra = N - P; // number of preliminary matches needed
+      const rnds = Math.log2(P);
+      const hasPrelim = extra > 0;
       const result = [];
+
+      // Direct teams (bypass preliminary)
+      const directTeams = halfTeams.slice(0, P - extra);
+      // Preliminary teams (play preliminary round)
+      const prelimTeams = halfTeams.slice(P - extra);
+
+      // Add preliminary round if needed
+      if (hasPrelim) {
+        const prelim = [];
+        const mainR1Count = P / 2;
+        for (let i = 0; i < mainR1Count; i++) {
+          if (i >= mainR1Count - extra) {
+            const pIdx = i - (mainR1Count - extra);
+            prelim.push({
+              top: prelimTeams[pIdx * 2],
+              bot: prelimTeams[pIdx * 2 + 1],
+              seedTop: seedOffset + (P - extra) + pIdx * 2 + 1,
+              seedBot: seedOffset + (P - extra) + pIdx * 2 + 2,
+              isPrelim: true,
+            });
+          } else {
+            prelim.push({ top: { name: null }, bot: { name: null }, isEmpty: true });
+          }
+        }
+        result.push(prelim);
+      }
+
+      // First main round
       const r0 = [];
-      for (let i = 0; i < halfTeams.length; i += 2) {
-        r0.push({
-          top: halfTeams[i],
-          bot: halfTeams[i + 1],
-          seedTop: seedOffset + i + 1,
-          seedBot: seedOffset + i + 2,
-        });
+      let dIdx = 0;
+      const mainR1Count = P / 2;
+      for (let i = 0; i < mainR1Count; i++) {
+        if (hasPrelim && i >= mainR1Count - extra) {
+          // One direct team + one TBD from preliminary
+          r0.push({
+            top: directTeams[dIdx],
+            bot: { name: null },
+            seedTop: seedOffset + dIdx + 1,
+            seedBot: null,
+          });
+          dIdx++;
+        } else {
+          r0.push({
+            top: directTeams[dIdx],
+            bot: directTeams[dIdx + 1],
+            seedTop: seedOffset + dIdx + 1,
+            seedBot: seedOffset + dIdx + 2,
+          });
+          dIdx += 2;
+        }
       }
       result.push(r0);
 
-      for (let r = 1; r < rnds - 1; r++) {
-        const prev = result[r - 1];
+      // Remaining main rounds
+      for (let r = 1; r < rnds; r++) {
+        const prev = result[result.length - 1];
         const curr = [];
         for (let i = 0; i < prev.length; i += 2) {
           curr.push({ top: { name: null }, bot: { name: null } });
         }
         result.push(curr);
       }
-      // Last round before final: 1 match
-      if (rnds > 1) {
-        const prev = result[result.length - 1];
-        if (prev.length > 1) {
-          const curr = [];
-          for (let i = 0; i < prev.length; i += 2) {
-            curr.push({ top: { name: null }, bot: { name: null } });
-          }
-          result.push(curr);
-        }
-      }
-      return result;
+
+      return { rounds: result, hasPrelim };
     };
 
-    const left = buildHalfRounds(leftTeams, 0);
-    const right = buildHalfRounds(rightTeams, half);
+    const left = buildHalfRounds(leftTeamsRaw, 0);
+    const right = buildHalfRounds(rightTeamsRaw, leftTeamsRaw.length);
 
-    return { leftRounds: left, rightRounds: right };
+    return {
+      leftRounds: left.rounds,
+      rightRounds: right.rounds,
+      leftHasPrelim: left.hasPrelim,
+      rightHasPrelim: right.hasPrelim,
+    };
   }, [teams]);
 
   const computeLines = useCallback(() => {
@@ -82,6 +120,8 @@ export default function Bracket({ teams }) {
         const isLastSideRound = r === sideRounds.length - 1;
 
         for (let m = 0; m < currentRound.length; m++) {
+          if (currentRound[m].isEmpty) continue;
+
           const el = matchRefs.current[`${sidePrefix}-${r}`]?.[m];
           if (!el) continue;
 
@@ -89,7 +129,9 @@ export default function Bracket({ teams }) {
           if (isLastSideRound) {
             nextEl = matchRefs.current["final"]?.[0];
           } else {
-            const nextM = Math.floor(m / 2);
+            // 1:1 mapping for preliminary→main round, 2:1 for normal rounds
+            const nextRoundLen = sideRounds[r + 1]?.length;
+            const nextM = currentRound.length === nextRoundLen ? m : Math.floor(m / 2);
             nextEl = matchRefs.current[`${sidePrefix}-${r + 1}`]?.[nextM];
           }
           if (!nextEl) continue;
@@ -133,13 +175,16 @@ export default function Bracket({ teams }) {
 
   if (!teams || teams.length === 0) return null;
 
-  const getRoundName = (rIdx, totalSideRounds) => {
-    const remaining = totalSideRounds - rIdx;
+  const getRoundName = (rIdx, totalSideRounds, hasPrelim) => {
+    if (hasPrelim && rIdx === 0) return "Preliminary";
+    const mainRIdx = hasPrelim ? rIdx - 1 : rIdx;
+    const mainTotal = hasPrelim ? totalSideRounds - 1 : totalSideRounds;
+    const remaining = mainTotal - mainRIdx;
     if (remaining === 1) return "Semi Final";
     if (remaining === 2) return "Quarter Final";
     if (remaining === 3) return "Round of 16";
     if (remaining === 4) return "Round of 32";
-    return `Round ${rIdx + 1}`;
+    return `Round ${mainRIdx + 1}`;
   };
 
   const setMatchRef = (roundKey, mIdx, el) => {
@@ -147,26 +192,29 @@ export default function Bracket({ teams }) {
     matchRefs.current[roundKey][mIdx] = el;
   };
 
-  const renderMatch = (match, rIdx, mIdx, roundKey, isFirstRound) => (
-    <div
-      key={mIdx}
-      className="bkt-slot"
-      ref={(el) => setMatchRef(roundKey, mIdx, el)}
-    >
-      <div className="bkt-match">
-        <div className={`bkt-team ${!match.top.name ? "bkt-team--empty" : ""}`}>
-          {isFirstRound && <span className="bkt-seed">{match.seedTop}</span>}
-          <span className="bkt-name">{match.top.name || (match.top.isBye ? "BYE" : "—")}</span>
-        </div>
-        <div className={`bkt-team ${!match.bot.name ? "bkt-team--empty" : ""}`}>
-          {isFirstRound && <span className="bkt-seed">{match.seedBot}</span>}
-          <span className="bkt-name">{match.bot.name || (match.bot.isBye ? "BYE" : "—")}</span>
+  const renderMatch = (match, rIdx, mIdx, roundKey) => {
+    if (match.isEmpty) {
+      return <div key={mIdx} className="bkt-slot" />;
+    }
+    return (
+      <div
+        key={mIdx}
+        className="bkt-slot"
+        ref={(el) => setMatchRef(roundKey, mIdx, el)}
+      >
+        <div className="bkt-match">
+          <div className={`bkt-team ${!match.top.name ? "bkt-team--empty" : ""}`}>
+            {match.seedTop != null && <span className="bkt-seed">{match.seedTop}</span>}
+            <span className="bkt-name">{match.top.name || (match.top.isBye ? "BYE" : "—")}</span>
+          </div>
+          <div className={`bkt-team ${!match.bot.name ? "bkt-team--empty" : ""}`}>
+            {match.seedBot != null && <span className="bkt-seed">{match.seedBot}</span>}
+            <span className="bkt-name">{match.bot.name || (match.bot.isBye ? "BYE" : "—")}</span>
+          </div>
         </div>
       </div>
-    </div>
-  );
-
-  const totalSideRounds = leftRounds.length;
+    );
+  };
 
   return (
     <div className="bkt-container" ref={containerRef}>
@@ -174,13 +222,13 @@ export default function Bracket({ teams }) {
       <div className="bkt-labels">
         {leftRounds.map((_, rIdx) => (
           <div key={`ll-${rIdx}`} className="bkt-label">
-            {getRoundName(rIdx, totalSideRounds)}
+            {getRoundName(rIdx, leftRounds.length, leftHasPrelim)}
           </div>
         ))}
         <div className="bkt-label bkt-label--champ"><Trophy className="inline-block w-4 h-4 mr-1" /> Final</div>
         {[...rightRounds].reverse().map((_, rIdx) => (
           <div key={`rl-${rIdx}`} className="bkt-label">
-            {getRoundName(rightRounds.length - 1 - rIdx, totalSideRounds)}
+            {getRoundName(rightRounds.length - 1 - rIdx, rightRounds.length, rightHasPrelim)}
           </div>
         ))}
       </div>
@@ -191,7 +239,7 @@ export default function Bracket({ teams }) {
         {leftRounds.map((matches, rIdx) => (
           <div key={`L-${rIdx}`} className="bkt-round">
             {matches.map((match, mIdx) =>
-              renderMatch(match, rIdx, mIdx, `L-${rIdx}`, rIdx === 0)
+              renderMatch(match, rIdx, mIdx, `L-${rIdx}`)
             )}
           </div>
         ))}
@@ -215,7 +263,7 @@ export default function Bracket({ teams }) {
           return (
             <div key={`R-${rIdx}`} className="bkt-round">
               {matches.map((match, mIdx) =>
-                renderMatch(match, rIdx, mIdx, `R-${rIdx}`, rIdx === 0)
+                renderMatch(match, rIdx, mIdx, `R-${rIdx}`)
               )}
             </div>
           );

@@ -2,14 +2,84 @@ import React, { useEffect, useRef, useState } from "react";
 import { Dices, Hand, CircleCheckBig, RefreshCw } from "lucide-react";
 import Bracket from "./Bracket";
 
-const TOTAL_PAIRS = 64;
+const pairs_data = [
+  { p1: "ALI", p2: "ROBY" },
+  { p1: "YOGI", p2: "HUSEN" },
+  { p1: "ABAH BAGIO", p2: "BABR" },
+  { p1: "JADUL", p2: "GUGUS" },
+  { p1: "DANIL", p2: "ZEIN" },
+  { p1: "AZMI", p2: "WAYANG" },
+  { p1: "ARIFIN", p2: "AUREL" },
+  { p1: "ICANG", p2: "HARI" },
+  { p1: "MUSLIH", p2: "FAISOL" },
+  { p1: "SLAMET", p2: "WAHYU" },
+  { p1: "JUNED", p2: "AHMAD" },
+  { p1: "DONI", p2: "YUYUT" },
+  { p1: "ARIF", p2: "NANANG" },
+  { p1: "APING", p2: "YUDHA" },
+  { p1: "AAN", p2: "SUBEKI" },
+  { p1: "WAWAN", p2: "OKEM" },
+  { p1: "BAGUS", p2: "FARUQ" },
+  { p1: "FIRMAN", p2: "MANTRI" },
+  { p1: "ROY", p2: "SONI" },
+  { p1: "TONI", p2: "FEBRI" },
+  { p1: "REHAN", p2: "RIO" },
+  { p1: "HILMAN", p2: "YERI" },
+  { p1: "FAIQ", p2: "HUDA" },
+  { p1: "LASIN", p2: "EKO BOM" },
+  { p1: "RONI", p2: "SAIFUL" },
+  { p1: "GALIH", p2: "ARIP" },
+  { p1: "RAHMA", p2: "RIADI" },
+  { p1: "HAQI", p2: "BUDI DNR" },
+  { p1: "AGUNG CJ", p2: "SULTON" },
+  { p1: "DADANG", p2: "ROFIQ" },
+  { p1: "HAMZAH", p2: "SAFI'I" },
+  { p1: "MAHMUD", p2: "WASIS" },
+  { p1: "FAHMI", p2: "HARI" },
+  { p1: "DAYAT", p2: "KAFID" },
+  { p1: "HERI", p2: "DRAJAD" },
+  { p1: "AHMAD", p2: "APRIL" },
+  { p1: "UNTUNG", p2: "JUNDAY" },
+  { p1: "RIO", p2: "ILHAM" },
+  { p1: "M.PUR", p2: "RISKI" },
+  { p1: "DEDEN", p2: "WAHYU" },
+  { p1: "LOTA", p2: "RENDRA" },
+  { p1: "MUKIDI", p2: "SANTOS" },
+  { p1: "FRENGKY", p2: "ANGGA" },
+  { p1: "YANTO", p2: "ROZAQ" },
+  { p1: "JIHAN", p2: "BOJEZ" },
+  { p1: "NANANG", p2: "JOLLY" },
+  { p1: "AKID", p2: "ARYO" },
+  { p1: "RAFAEL", p2: "DENIS" },
+  { p1: "SANDY", p2: "DIMAS" },
+  { p1: "JOHAN", p2: "HERU" },
+  { p1: "AGUS", p2: "SANDI" },
+  { p1: "RONI", p2: "SUKRON" },
+  { p1: "YUSUF", p2: "MAUL" },
+  { p1: "RIDHO", p2: "DINO" },
+  { p1: "DAFA", p2: "RENO" },
+  { p1: "IPUNG", p2: "FANANI" },
+  { p1: "FEBRI", p2: "ARIS" },
+  { p1: "MUNIR", p2: "UNTUNG" },
+  { p1: "RONI", p2: "MADE" },
+  { p1: "AJI", p2: "SUKRI" },
+  { p1: "RIO", p2: "DIKA" },
+  { p1: "ASRUL", p2: "PENDIK" },
+  { p1: "SUN", p2: "DENI" },
+  { p1: "ALFARO", p2: "AAN" },
+  { p1: "MOMON", p2: "PUTUT" },
+  { p1: "YAYAN", p2: "YANTO" },
+  { p1: "JUNED", p2: "SULTON CIPALI" },
+  { p1: "KABUL", p2: "HASAN" },
+];
 
-// Generate 128 dummy player names
-const dummyNames = Array.from({ length: TOTAL_PAIRS * 2 }, (_, i) => `Player ${i + 1}`);
+const TOTAL_PAIRS = pairs_data.length;
+
+const allNames = pairs_data.flatMap((p) => [p.p1, p.p2]);
 
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
-const getRandomName = () => dummyNames[Math.floor(Math.random() * dummyNames.length)];
+const getRandomName = () => allNames[Math.floor(Math.random() * allNames.length)];
 
 export default function App() {
   const [pairs, setPairs] = useState([]);
@@ -21,13 +91,8 @@ export default function App() {
   const intervalRef = useRef(null);
 
   const generateRandomPairs = () => {
-    // Pairs are always sequential: Player 1 & Player 2, Player 3 & Player 4, etc.
-    const fixedPairs = [];
-    for (let i = 0; i < dummyNames.length; i += 2) {
-      fixedPairs.push({ p1: dummyNames[i], p2: dummyNames[i + 1] });
-    }
     // Only shuffle the position/order of pairs in the bracket
-    return shuffle(fixedPairs);
+    return shuffle([...pairs_data]);
   };
 
   const start = () => {
