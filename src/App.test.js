@@ -1,8 +1,363 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import React, { useEffect, useRef, useState } from "react";
+import { Dices, Hand, CircleCheckBig, RefreshCw } from "lucide-react";
+import Bracket from "./Bracket";
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
-});
+const pairs_data = [
+  { p1: "ALI", p2: "ROBY", pb: "BAJA BETON" },
+  { p1: "YOGI", p2: "HUSEN", pb: "BAJA BETON" },
+  { p1: "ABAH BAGIO", p2: "BABAR", pb: "BAJA BETON" },
+  { p1: "JADUL", p2: "GUGUS", pb: "BAJA BETON" },
+  { p1: "DANIL", p2: "ZEIN", pb: "BAJA BETON" },
+  { p1: "AZMI", p2: "WAYANG", pb: "BAJA BETON" },
+  { p1: "ARIFIN", p2: "AUREL", pb: "BAJA BETON" },
+  { p1: "ICANG", p2: "HARI", pb: "BAJA BETON" },
+  { p1: "MUSLIH", p2: "FAISOL", pb: "BAJA BETON" },
+  { p1: "SLAMET", p2: "WAHYU", pb: "BAJA BETON" },
+  { p1: "JUNED", p2: "AHMAD", pb: "BAJA BETON" },
+  { p1: "DONI", p2: "YUYUT", pb: "SGN REBORN" },
+  { p1: "ARIF", p2: "NANANG", pb: "SGN REBORN" },
+  { p1: "APING", p2: "YUDHA", pb: "SGN REBORN" },
+  { p1: "AAN", p2: "SUBEKI", pb: "SGN REBORN" },
+  { p1: "WAWAN", p2: "OKEM", pb: "SGN REBORN" },
+  { p1: "BAGUS", p2: "FARUQ", pb: "SGN REBORN" },
+  { p1: "FIRMAN", p2: "MANTRI", pb: "SGN REBORN" },
+  { p1: "ROY", p2: "SONI", pb: "SBBC" },
+  { p1: "TONI", p2: "FEBRI", pb: "SBBC" },
+  { p1: "REHAN", p2: "RIO", pb: "SBBC" },
+  { p1: "HILMAN", p2: "YERI", pb: "SBBC" },
+  { p1: "FAIQ", p2: "HUDA", pb: "SBBC" },
+  { p1: "LASIN", p2: "EKO BOM", pb: "SBBC" },
+  { p1: "RONI", p2: "SAIFUL", pb: "GOJEX" },
+  { p1: "GALIH", p2: "ARIP", pb: "GOJEX" },
+  { p1: "RAHMA", p2: "RIADI", pb: "XWUNGU" },
+  { p1: "HAQI", p2: "BUDI DNR", pb: "XWUNGU" },
+  { p1: "WIDODO", p2: "AMBAR", pb: "RINGIN CONTONG" },
+  { p1: "DADANG", p2: "ROFIQ", pb: "XWUNGU" },
+  { p1: "HAMZAH", p2: "SAFI'I", pb: "XWUNGU" },
+  { p1: "MAHMUD", p2: "WASIS", pb: "XWUNGU" },
+  { p1: "FAHMI", p2: "HARI", pb: "AFANDA" },
+  { p1: "DAYAT", p2: "KAFID", pb: "AFANDA" },
+  { p1: "HERI", p2: "DRAJAD", pb: "AFANDA" },
+  { p1: "SON", p2: "APRIL", pb: "SBX MALANG" },
+  { p1: "ANDRE", p2: "JUNDAN", pb: "SBX MALANG" },
+  { p1: "RIO", p2: "ILHAM", pb: "OBASERA" },
+  { p1: "M.PUR", p2: "RISKI", pb: "OBASERA" },
+  { p1: "DEDEN", p2: "WAHYU", pb: "PARE" },
+  { p1: "LOTA", p2: "RENDRA", pb: "PARE" },
+  { p1: "MUKIDI", p2: "SANTOS", pb: "PARE" },
+  { p1: "FRENGKY", p2: "ANGGA", pb: "PARE" },
+  { p1: "YANTO", p2: "ROZAQ", pb: "RAJAWALI" },
+  { p1: "JIHAN", p2: "BOJEZ", pb: "RAJAWALI" },
+  { p1: "NANANG", p2: "JOLLY", pb: "ROXY" },
+  { p1: "AKID", p2: "ARYO", pb: "ROXY" },
+  { p1: "RAFAEL", p2: "DENIS", pb: "SATRIA" },
+  { p1: "SANDY", p2: "DIMAS", pb: "SATRIA" },
+  { p1: "JOHAN", p2: "HERU", pb: "GEWA" },
+  { p1: "AGUS", p2: "SANDI", pb: "DR.HUSADA" },
+  { p1: "RONI", p2: "SUKRON", pb: "HUSADA" },
+  { p1: "IRFIN", p2: "BU KAJI", pb: "AN NUR" },
+  { p1: "RIDHO", p2: "DINO", pb: "TIMUR JAYA" },
+  { p1: "DAFA", p2: "RENO", pb: "MOJOSARI" },
+  { p1: "IPUNG", p2: "FANANI", pb: "PB JUANG" },
+  { p1: "DANI", p2: "ABID", pb: "AFANDA" },
+  { p1: "MUNIR", p2: "UNTUNG", pb: "KEDIRI" },
+  { p1: "RONI", p2: "MADE", pb: "VARIASI MOTOR" },
+  { p1: "AJI", p2: "SUKRI", pb: "XBX" },
+  { p1: "RIO", p2: "DIKA", pb: "MK SONG" },
+  { p1: "ASRUL", p2: "PENDIK", pb: "PADI" },
+  { p1: "SUN", p2: "DENI", pb: "MOJOSARI" },
+  { p1: "ALFARO", p2: "AAN", pb: "DLR" },
+  { p1: "MOMON", p2: "PUTUT", pb: "TOYA" },
+  { p1: "YAYAN", p2: "YANTO", pb: "DUGADU" },
+  { p1: "JUNED", p2: "SULTON CIPALI", pb: "XWUNGU" },
+  { p1: "KABUL", p2: "HASAN", pb: "XWUNGU" },
+  { p1: "YOHANES", p2: "ARLIN", pb: "TRIDARMA" },
+  { p1: "APRI", p2: "SODIK", pb: "KEDIRI" },
+  { p1: "KO DIDIK", p2: "ANDRE", pb: "TIMUR JAYA" },
+];
+
+const TOTAL_PAIRS = pairs_data.length;
+
+const allNames = pairs_data.flatMap((p) => [p.p1, p.p2]);
+
+const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+const getRandomName = () => allNames[Math.floor(Math.random() * allNames.length)];
+
+// Compute all index pairs that face each other in the first round (prelim + main R1)
+const getFirstRoundMatchups = (totalTeams) => {
+  const matchups = [];
+  const computeHalf = (n, offset) => {
+    const P = Math.pow(2, Math.floor(Math.log2(Math.max(n, 2))));
+    const extra = n - P;
+    const mainR1Count = P / 2;
+
+    // Preliminary pairs
+    for (let i = 0; i < extra; i++) {
+      const idx1 = offset + (P - extra) + i * 2;
+      const idx2 = offset + (P - extra) + i * 2 + 1;
+      matchups.push([idx1, idx2]);
+    }
+
+    // Main R1 pairs
+    let dIdx = 0;
+    for (let i = 0; i < mainR1Count; i++) {
+      if (i >= mainR1Count - extra) {
+        // Direct team vs prelim winner — check against both prelim teams
+        const directIdx = offset + dIdx;
+        const pRelIdx = i - (mainR1Count - extra);
+        const prelimIdx1 = offset + (P - extra) + pRelIdx * 2;
+        const prelimIdx2 = offset + (P - extra) + pRelIdx * 2 + 1;
+        matchups.push([directIdx, prelimIdx1]);
+        matchups.push([directIdx, prelimIdx2]);
+        dIdx++;
+      } else {
+        matchups.push([offset + dIdx, offset + dIdx + 1]);
+        dIdx += 2;
+      }
+    }
+  };
+
+  const halfCount = Math.ceil(totalTeams / 2);
+  computeHalf(halfCount, 0);
+  computeHalf(totalTeams - halfCount, halfCount);
+  return matchups;
+};
+
+const firstRoundMatchups = getFirstRoundMatchups(TOTAL_PAIRS);
+
+// Fixed position rules: force specific teams to specific bracket indices
+// so certain matchups are guaranteed regardless of shuffle.
+// index = position in the shuffled array (0-based)
+// Left side: indices 0-34 (seeds 1-35), Right side: indices 35-69 (seeds 36-70)
+// Left prelim seeds 30 vs 31 (indices 29,30) → winner faces seed 27 (index 26)
+const fixedPositionRules = [
+  { p1: "JADUL", p2: "GUGUS", index: 0 },
+  { p1: "WAWAN", p2: "OKEM", index: 1 },
+  { p1: "ALI", p2: "ROBY", index: 6 },
+  { p1: "HAQI", p2: "BUDI DNR", index: 7 },
+  { p1: "BAGUS", p2: "FARUQ", index: 8 },
+  { p1: "ABAH BAGIO", p2: "BABAR", index: 10 },
+  { p1: "ASRUL", p2: "PENDIK", index: 11 },
+  { p1: "HAMZAH", p2: "SAFI'I", index: 12 },
+  { p1: "REHAN", p2: "RIO", index: 15 },
+  { p1: "FRENGKY", p2: "ANGGA", index: 16 },
+  { p1: "RIO", p2: "DIKA", index: 17 },
+  { p1: "FIRMAN", p2: "MANTRI", index: 18 },
+  { p1: "YOGI", p2: "HUSEN", index: 19 },
+  { p1: "DAFA", p2: "RENO", index: 20 },
+  { p1: "RIO", p2: "ILHAM", index: 21 },
+  { p1: "RIDHO", p2: "DINO", index: 22 },
+  { p1: "JOHAN", p2: "HERU", index: 23 },
+  { p1: "RONI", p2: "SAIFUL", index: 26 },
+  { p1: "MUKIDI", p2: "SANTOS", index: 27 },
+  { p1: "JUNED", p2: "AHMAD", index: 28 },
+  { p1: "KABUL", p2: "HASAN", index: 29 },
+  { p1: "FAIQ", p2: "HUDA", index: 30 },
+  { p1: "DONI", p2: "YUYUT", index: 31 },
+  { p1: "MAHMUD", p2: "WASIS", index: 32 },
+  { p1: "MUNIR", p2: "UNTUNG", index: 33 },
+  { p1: "DADANG", p2: "ROFIQ", index: 34 },
+  { p1: "DANIL", p2: "ZEIN", index: 36 },
+  { p1: "ALFARO", p2: "AAN", index: 37 },
+  { p1: "TONI", p2: "FEBRI", index: 39 },
+  { p1: "RAHMA", p2: "RIADI", index: 41 },
+  { p1: "ARIF", p2: "NANANG", index: 42 },
+  { p1: "SLAMET", p2: "WAHYU", index: 45 },
+  { p1: "HILMAN", p2: "YERI", index: 46 },
+  { p1: "AAN", p2: "SUBEKI", index: 49 },
+  { p1: "ICANG", p2: "HARI", index: 50 },
+  { p1: "JUNED", p2: "SULTON CIPALI", index: 51 },
+  { p1: "ROY", p2: "SONI", index: 52 },
+  { p1: "ARIFIN", p2: "AUREL", index: 56 },
+  { p1: "APING", p2: "YUDHA", index: 58 },
+  { p1: "DADANG", p2: "ROFIQ", index: 59 },
+  { p1: "AZMI", p2: "WAYANG", index: 64 },
+  { p1: "MUSLIH", p2: "FAISOL", index: 65 },
+  { p1: "YANTO", p2: "ROZAQ", index: 66 },
+];
+
+const fixedIndices = new Set(fixedPositionRules.map((r) => r.index));
+
+export default function App() {
+  const [pairs, setPairs] = useState([]);
+  const [displayPairs, setDisplayPairs] = useState(
+    Array.from({ length: TOTAL_PAIRS }, () => ["", ""])
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDone, setIsDone] = useState(false);
+  const intervalRef = useRef(null);
+
+  const generateRandomPairs = () => {
+    for (let attempt = 0; attempt < 500; attempt++) {
+      let shuffled = shuffle([...pairs_data]);
+
+      // Apply fixed position rules: place specific teams at required indices
+      for (const rule of fixedPositionRules) {
+        const currentIdx = shuffled.findIndex(
+          (p) => p.p1 === rule.p1 && p.p2 === rule.p2
+        );
+        if (currentIdx !== -1 && currentIdx !== rule.index) {
+          [shuffled[currentIdx], shuffled[rule.index]] = [shuffled[rule.index], shuffled[currentIdx]];
+        }
+      }
+
+      // Check: no same-PB teams in first round matchups
+      const hasConflict = firstRoundMatchups.some(
+        ([a, b]) => shuffled[a].pb === shuffled[b].pb
+      );
+      if (!hasConflict) return shuffled;
+    }
+
+    // Fallback: return last shuffle (shouldn't happen normally)
+    console.warn("Could not find arrangement without same-PB first round matchup");
+    let shuffled = shuffle([...pairs_data]);
+    for (const rule of fixedPositionRules) {
+      const currentIdx = shuffled.findIndex(
+        (p) => p.p1 === rule.p1 && p.p2 === rule.p2
+      );
+      if (currentIdx !== -1 && currentIdx !== rule.index) {
+        [shuffled[currentIdx], shuffled[rule.index]] = [shuffled[rule.index], shuffled[currentIdx]];
+      }
+    }
+    return shuffled;
+  };
+
+  const start = () => {
+    const result = generateRandomPairs();
+    setPairs(result);
+    setIsLoading(true);
+    setIsDone(false);
+
+    intervalRef.current = setInterval(() => {
+      const temp = result.map(() => {
+        let a = getRandomName();
+        let b;
+        do {
+          b = getRandomName();
+        } while (a === b);
+        return [a, b];
+      });
+      setDisplayPairs(temp);
+    }, 80);
+  };
+
+  const stop = () => {
+    clearInterval(intervalRef.current);
+    setIsLoading(false);
+    setIsDone(true);
+    setDisplayPairs(pairs.map((p) => [p.p1, p.p2]));
+  };
+
+  useEffect(() => {
+    if (!isLoading && pairs.length > 0) {
+      setDisplayPairs(pairs.map((p) => [p.p1, p.p2]));
+    }
+  }, [pairs, isLoading]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-6 relative overflow-x-auto">
+      {/* Background ornaments */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Glowing blobs - larger and more visible */}
+        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-20 w-[450px] h-[450px] bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 left-1/4 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-20 right-1/3 w-80 h-80 bg-cyan-400/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-10 w-72 h-72 bg-violet-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-2/3 left-10 w-64 h-64 bg-teal-400/8 rounded-full blur-3xl" />
+        <div className="absolute top-10 left-1/2 w-96 h-96 bg-sky-400/8 rounded-full blur-3xl" />
+
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)`,
+            backgroundSize: "50px 50px",
+          }}
+        />
+
+        {/* Radial glow center top */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-400/8 rounded-full blur-3xl" />
+
+        {/* Subtle diagonal lines */}
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,0.2) 35px, rgba(255,255,255,0.2) 36px)`,
+          }}
+        />
+
+        {/* Dot pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: `radial-gradient(circle, rgba(148,163,184,0.4) 1px, transparent 1px)`,
+            backgroundSize: "30px 30px",
+          }}
+        />
+
+        {/* Floating ring shapes */}
+        <div className="absolute top-[15%] left-[10%] w-40 h-40 border border-white/5 rounded-full" />
+        <div className="absolute top-[15%] left-[10%] w-52 h-52 border border-white/[0.03] rounded-full" />
+        <div className="absolute bottom-[20%] right-[8%] w-48 h-48 border border-white/5 rounded-full" />
+        <div className="absolute bottom-[20%] right-[8%] w-64 h-64 border border-white/[0.03] rounded-full" />
+        <div className="absolute top-[60%] left-[45%] w-32 h-32 border border-white/[0.04] rounded-full" />
+
+        {/* Shuttlecock-inspired accent lines */}
+        <div className="absolute top-[8%] right-[15%] w-24 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-45" />
+        <div className="absolute top-[12%] right-[18%] w-20 h-[1px] bg-gradient-to-r from-transparent via-white/8 to-transparent rotate-45" />
+        <div className="absolute bottom-[15%] left-[20%] w-28 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent -rotate-45" />
+        <div className="absolute bottom-[18%] left-[22%] w-20 h-[1px] bg-gradient-to-r from-transparent via-white/8 to-transparent -rotate-45" />
+      </div>
+
+      <div className="mx-auto w-fit relative z-10">
+        <h1 className="text-4xl font-extrabold text-center mb-1 text-white tracking-tight">
+          Random Badminton Player Draw
+        </h1>
+        <p className="text-center text-blue-300/70 text-sm mb-8">
+          {TOTAL_PAIRS * 2} peserta &middot; {TOTAL_PAIRS} tim
+        </p>
+
+        <div className="flex justify-center gap-4 mb-8 min-h-[44px]">
+          {!isLoading && !isDone && (
+            <button
+              onClick={start}
+              className="bg-emerald-500 hover:bg-emerald-400 text-white px-10 py-3 rounded-full shadow-lg shadow-emerald-500/30 text-lg font-bold transition-all hover:scale-105"
+            >
+              <Dices className="inline-block w-5 h-5 mr-2" /> START
+            </button>
+          )}
+          {isLoading && (
+            <button
+              onClick={stop}
+              className="bg-rose-500 hover:bg-rose-400 text-white px-10 py-3 rounded-full shadow-lg shadow-rose-500/30 text-lg font-bold animate-pulse transition-all"
+            >
+              <Hand className="inline-block w-5 h-5 mr-2" /> STOP
+            </button>
+          )}
+          {!isLoading && isDone && (
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-emerald-400 font-semibold text-lg">
+                <CircleCheckBig className="inline-block w-5 h-5 mr-1" /> Undian selesai!
+              </p>
+              <button
+                onClick={() => { setIsDone(false); setPairs([]); setDisplayPairs(Array.from({ length: TOTAL_PAIRS }, () => ["", ""])); }}
+                className="bg-blue-500 hover:bg-blue-400 text-white px-5 py-2 rounded-lg shadow-lg shadow-blue-500/20 text-sm font-semibold transition-all hover:scale-105"
+              >
+                <RefreshCw className="inline-block w-4 h-4 mr-1" /> Ulang
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Tournament bracket */}
+        <Bracket
+          teams={displayPairs.map(([a, b], i) => ({
+            name: a && b ? `${a} / ${b}` : null,
+          }))}
+        />
+      </div>
+    </div>
+  );
+}

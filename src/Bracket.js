@@ -25,16 +25,28 @@ export default function Bracket({ teams }) {
       if (N <= 1) return { rounds: [], hasPrelim: false };
 
       // Largest power of 2 <= N for main bracket size
-      const P = Math.pow(2, Math.floor(Math.log2(Math.max(N, 2))));
-      const extra = N - P; // number of preliminary matches needed
+      let P = Math.pow(2, Math.floor(Math.log2(Math.max(N, 2))));
+      let extra = N - P; // number of preliminary matches needed
+
+      // When extra > P/2, prelim layout breaks — use next power of 2 with byes instead
+      if (extra > P / 2) {
+        P = P * 2;
+        extra = 0;
+      }
+
       const rnds = Math.log2(P);
       const hasPrelim = extra > 0;
       const result = [];
 
+      // Pad with byes if needed (when P > N after bumping)
+      const paddedTeams = P > N
+        ? [...halfTeams, ...Array.from({ length: P - N }, () => ({ name: null, isBye: true }))]
+        : halfTeams;
+
       // Direct teams (bypass preliminary)
-      const directTeams = halfTeams.slice(0, P - extra);
+      const directTeams = paddedTeams.slice(0, P - extra);
       // Preliminary teams (play preliminary round)
-      const prelimTeams = halfTeams.slice(P - extra);
+      const prelimTeams = paddedTeams.slice(P - extra);
 
       // Add preliminary round if needed
       if (hasPrelim) {
